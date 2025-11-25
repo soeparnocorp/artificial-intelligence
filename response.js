@@ -2,6 +2,7 @@
 
 class AIVisualEffects {
     constructor() {
+        this.matrixInitialized = false;
         this.init();
     }
 
@@ -14,13 +15,21 @@ class AIVisualEffects {
         this.initInteractiveBackground();
     }
 
-    // Matrix Rain Effect
+    // Matrix Rain Effect - PRIORITY
     initMatrixRain() {
         const canvas = document.getElementById("matrixCanvas");
-        const ctx = canvas.getContext("2d");
+        if (!canvas) {
+            console.error("Matrix canvas not found!");
+            return;
+        }
 
+        const ctx = canvas.getContext("2d");
+        
+        // Set canvas size
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        console.log("Matrix Canvas initialized:", canvas.width, "x", canvas.height);
 
         const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const fontSize = 14;
@@ -28,56 +37,85 @@ class AIVisualEffects {
         const drops = new Array(columns).fill(1);
 
         const drawMatrix = () => {
-            ctx.fillStyle = "rgba(0,0,0,0.08)";
+            // Clear with semi-transparent black for trail effect
+            ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "rgba(255,255,255,0.7)";
-            ctx.font = fontSize + "px monospace";
-
+            
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.font = `${fontSize}px monospace`;
+            
             for (let i = 0; i < drops.length; i++) {
-                const char = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                // Random character
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                
+                // Get x position
+                const x = i * fontSize;
+                
+                // Get y position
+                const y = drops[i] * fontSize;
+                
+                // Draw the character
+                ctx.fillText(text, x, y);
+                
+                // Reset drop if it reaches bottom with random chance
+                if (y > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
+                
                 drops[i]++;
             }
         };
 
-        setInterval(drawMatrix, 40);
+        // Start the matrix animation
+        this.matrixInterval = setInterval(drawMatrix, 35);
+        this.matrixInitialized = true;
+        
+        console.log("Matrix Rain started with", columns, "columns");
 
+        // Handle window resize
         window.addEventListener("resize", () => {
+            console.log("Window resized - resetting matrix");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            
+            // Reinitialize drops array for new column count
+            const newColumns = Math.floor(canvas.width / fontSize);
+            drops.length = newColumns;
+            for (let i = 0; i < newColumns; i++) {
+                if (!drops[i]) drops[i] = 1;
+            }
         });
     }
 
-    // Floating Particles System
+    // Floating Particles System - Lighter version
     createParticles() {
         const particlesContainer = document.querySelector('.floating-particles');
-        const particleCount = 30;
+        if (!particlesContainer) return;
+
+        const particleCount = 20; // Reduced for better performance
 
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            const size = Math.random() * 3 + 1;
+            const size = Math.random() * 2 + 1;
             const posX = Math.random() * 100;
             const posY = Math.random() * 100;
             const delay = Math.random() * 20;
-            const duration = Math.random() * 10 + 10;
+            const duration = Math.random() * 15 + 15;
             
             particle.style.cssText = `
                 position: absolute;
                 width: ${size}px;
                 height: ${size}px;
-                background: rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2});
+                background: rgba(255, 255, 255, ${Math.random() * 0.3 + 0.1});
                 border-radius: 50%;
                 left: ${posX}%;
                 top: ${posY}%;
                 animation: floatParticle ${duration}s ease-in-out ${delay}s infinite;
-                filter: blur(${Math.random() * 1}px);
+                filter: blur(${Math.random() * 0.5}px);
+                pointer-events: none;
+                z-index: -1;
             `;
 
             particlesContainer.appendChild(particle);
@@ -87,24 +125,27 @@ class AIVisualEffects {
     }
 
     addParticleAnimationStyle() {
+        if (document.querySelector('#particle-animations')) return;
+        
         const style = document.createElement('style');
+        style.id = 'particle-animations';
         style.textContent = `
             @keyframes floatParticle {
                 0%, 100% {
                     transform: translate(0, 0) rotate(0deg);
-                    opacity: 0.3;
+                    opacity: 0.2;
                 }
                 25% {
-                    transform: translate(100px, -50px) rotate(90deg);
-                    opacity: 0.7;
+                    transform: translate(80px, -40px) rotate(90deg);
+                    opacity: 0.5;
                 }
                 50% {
-                    transform: translate(50px, -100px) rotate(180deg);
-                    opacity: 0.4;
+                    transform: translate(40px, -80px) rotate(180deg);
+                    opacity: 0.3;
                 }
                 75% {
-                    transform: translate(-50px, -50px) rotate(270deg);
-                    opacity: 0.8;
+                    transform: translate(-40px, -40px) rotate(270deg);
+                    opacity: 0.6;
                 }
             }
         `;
@@ -122,7 +163,9 @@ class AIVisualEffects {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('animate-in');
-                    this.animateFeatureCards(entry.target);
+                    if (entry.target.classList.contains('features')) {
+                        this.animateFeatureCards(entry.target);
+                    }
                 }
             });
         }, observerOptions);
@@ -130,30 +173,15 @@ class AIVisualEffects {
         document.querySelectorAll('.feature-card, .stat-item, .package-box').forEach(el => {
             observer.observe(el);
         });
-
-        window.addEventListener('scroll', this.handleParallax.bind(this));
-    }
-
-    handleParallax() {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.background-effects, .orb');
-        
-        parallaxElements.forEach((el, index) => {
-            const speed = 0.5 + (index * 0.1);
-            const yPos = -(scrolled * speed);
-            el.style.transform = `translateY(${yPos}px)`;
-        });
     }
 
     animateFeatureCards(section) {
-        if (section.classList.contains('features')) {
-            const cards = section.querySelectorAll('.feature-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.animation = `slideUp 0.6s ease-out ${index * 0.2}s both`;
-                }, 100);
-            });
-        }
+        const cards = section.querySelectorAll('.feature-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.animation = `slideUp 0.6s ease-out ${index * 0.2}s both`;
+            }, 100);
+        });
     }
 
     // Button Effects
@@ -321,11 +349,18 @@ class AIVisualEffects {
         const orbs = document.querySelectorAll('.orb');
         orbs.forEach((orb, index) => {
             const speed = (index + 1) * 0.0001;
-            const x = mouseX * 100 * speed;
-            const y = mouseY * 100 * speed;
+            const x = mouseX * 50 * speed;
+            const y = mouseY * 50 * speed;
             
-            orb.style.transform += ` translate(${x}px, ${y}px)`;
+            orb.style.transform = `translate(${x}px, ${y}px)`;
         });
+    }
+
+    // Cleanup
+    destroy() {
+        if (this.matrixInterval) {
+            clearInterval(this.matrixInterval);
+        }
     }
 }
 
@@ -362,13 +397,35 @@ const additionalStyles = `
         opacity: 1;
         transform: translateY(0);
     }
+
+    /* Ensure matrix canvas is properly layered */
+    #matrixCanvas {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: -2 !important;
+        display: block !important;
+    }
 `;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Add additional styles
     const styleSheet = document.createElement('style');
     styleSheet.textContent = additionalStyles;
     document.head.appendChild(styleSheet);
     
-    new AIVisualEffects();
+    // Initialize visual effects
+    window.visualEffects = new AIVisualEffects();
+    
+    console.log("Anna Laura AI Visual Effects initialized");
+});
+
+// Handle page unload
+window.addEventListener('beforeunload', () => {
+    if (window.visualEffects) {
+        window.visualEffects.destroy();
+    }
 });
