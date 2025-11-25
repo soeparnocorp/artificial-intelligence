@@ -1,121 +1,46 @@
-// response.js - Advanced Visual Effects for Anna Laura AI Landing Page
+// response.js - Monochrome Visual Effects for Anna Laura AI
 
 class AIVisualEffects {
     constructor() {
-        this.matrixInitialized = false;
         this.init();
     }
 
     init() {
-        this.initMatrixRain();
         this.createParticles();
         this.initScrollAnimations();
         this.initButtonEffects();
         this.initCounterAnimation();
         this.initInteractiveBackground();
+        this.initFloatingElements();
     }
 
-    // Matrix Rain Effect - PRIORITY
-    initMatrixRain() {
-        const canvas = document.getElementById("matrixCanvas");
-        if (!canvas) {
-            console.error("Matrix canvas not found!");
-            return;
-        }
-
-        const ctx = canvas.getContext("2d");
-        
-        // Set canvas size
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        console.log("Matrix Canvas initialized:", canvas.width, "x", canvas.height);
-
-        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const fontSize = 14;
-        const columns = Math.floor(canvas.width / fontSize);
-        const drops = new Array(columns).fill(1);
-
-        const drawMatrix = () => {
-            // Clear with semi-transparent black for trail effect
-            ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-            ctx.font = `${fontSize}px monospace`;
-            
-            for (let i = 0; i < drops.length; i++) {
-                // Random character
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                
-                // Get x position
-                const x = i * fontSize;
-                
-                // Get y position
-                const y = drops[i] * fontSize;
-                
-                // Draw the character
-                ctx.fillText(text, x, y);
-                
-                // Reset drop if it reaches bottom with random chance
-                if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                
-                drops[i]++;
-            }
-        };
-
-        // Start the matrix animation
-        this.matrixInterval = setInterval(drawMatrix, 35);
-        this.matrixInitialized = true;
-        
-        console.log("Matrix Rain started with", columns, "columns");
-
-        // Handle window resize
-        window.addEventListener("resize", () => {
-            console.log("Window resized - resetting matrix");
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            // Reinitialize drops array for new column count
-            const newColumns = Math.floor(canvas.width / fontSize);
-            drops.length = newColumns;
-            for (let i = 0; i < newColumns; i++) {
-                if (!drops[i]) drops[i] = 1;
-            }
-        });
-    }
-
-    // Floating Particles System - Lighter version
+    // Floating Particles System
     createParticles() {
         const particlesContainer = document.querySelector('.floating-particles');
-        if (!particlesContainer) return;
-
-        const particleCount = 20; // Reduced for better performance
+        const particleCount = 40;
 
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            const size = Math.random() * 2 + 1;
+            const size = Math.random() * 3 + 1;
             const posX = Math.random() * 100;
             const posY = Math.random() * 100;
             const delay = Math.random() * 20;
-            const duration = Math.random() * 15 + 15;
+            const duration = Math.random() * 15 + 10;
+            const opacity = Math.random() * 0.4 + 0.1;
             
             particle.style.cssText = `
                 position: absolute;
                 width: ${size}px;
                 height: ${size}px;
-                background: rgba(255, 255, 255, ${Math.random() * 0.3 + 0.1});
+                background: rgba(255, 255, 255, ${opacity});
                 border-radius: 50%;
                 left: ${posX}%;
                 top: ${posY}%;
                 animation: floatParticle ${duration}s ease-in-out ${delay}s infinite;
-                filter: blur(${Math.random() * 0.5}px);
+                filter: blur(${Math.random() * 1}px);
                 pointer-events: none;
-                z-index: -1;
             `;
 
             particlesContainer.appendChild(particle);
@@ -125,31 +50,36 @@ class AIVisualEffects {
     }
 
     addParticleAnimationStyle() {
-        if (document.querySelector('#particle-animations')) return;
-        
         const style = document.createElement('style');
-        style.id = 'particle-animations';
         style.textContent = `
             @keyframes floatParticle {
                 0%, 100% {
                     transform: translate(0, 0) rotate(0deg);
-                    opacity: 0.2;
-                }
-                25% {
-                    transform: translate(80px, -40px) rotate(90deg);
-                    opacity: 0.5;
-                }
-                50% {
-                    transform: translate(40px, -80px) rotate(180deg);
                     opacity: 0.3;
                 }
+                25% {
+                    transform: translate(100px, -50px) rotate(90deg);
+                    opacity: 0.7;
+                }
+                50% {
+                    transform: translate(50px, -100px) rotate(180deg);
+                    opacity: 0.4;
+                }
                 75% {
-                    transform: translate(-40px, -40px) rotate(270deg);
-                    opacity: 0.6;
+                    transform: translate(-50px, -50px) rotate(270deg);
+                    opacity: 0.8;
                 }
             }
         `;
         document.head.appendChild(style);
+    }
+
+    // Floating AI Elements
+    initFloatingElements() {
+        const neurons = document.querySelectorAll('.neuron');
+        neurons.forEach((neuron, index) => {
+            neuron.style.animationDelay = `${index * 0.5}s`;
+        });
     }
 
     // Scroll Animations
@@ -172,6 +102,19 @@ class AIVisualEffects {
 
         document.querySelectorAll('.feature-card, .stat-item, .package-box').forEach(el => {
             observer.observe(el);
+        });
+
+        window.addEventListener('scroll', this.handleParallax.bind(this));
+    }
+
+    handleParallax() {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('.background-effects, .orb');
+        
+        parallaxElements.forEach((el, index) => {
+            const speed = 0.3 + (index * 0.1);
+            const yPos = -(scrolled * speed);
+            el.style.transform = `translateY(${yPos}px)`;
         });
     }
 
@@ -196,6 +139,11 @@ class AIVisualEffects {
         const exploreBtn = document.getElementById('exploreBtn');
         if (exploreBtn) {
             exploreBtn.addEventListener('click', this.exploreEffect.bind(this));
+        }
+
+        const learnBtn = document.getElementById('learnBtn');
+        if (learnBtn) {
+            learnBtn.addEventListener('click', this.createClickEffect.bind(this));
         }
     }
 
@@ -229,7 +177,7 @@ class AIVisualEffects {
 
     createClickEffect(e) {
         const button = e.currentTarget;
-        const particles = 6;
+        const particles = 8;
         
         for (let i = 0; i < particles; i++) {
             const particle = document.createElement('div');
@@ -251,9 +199,9 @@ class AIVisualEffects {
 
             const animation = particle.animate([
                 { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                { transform: `translate(${Math.cos(angle) * 40}px, ${Math.sin(angle) * 40}px) scale(0)`, opacity: 0 }
+                { transform: `translate(${Math.cos(angle) * 50}px, ${Math.sin(angle) * 50}px) scale(0)`, opacity: 0 }
             ], {
-                duration: 600,
+                duration: 800,
                 easing: 'ease-out'
             });
 
@@ -287,7 +235,7 @@ class AIVisualEffects {
             style.textContent = `
                 @keyframes exploreExpand {
                     0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-                    100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+                    100% { transform: translate(-50%, -50%) scale(20); opacity: 0; }
                 }
             `;
             document.head.appendChild(style);
@@ -295,9 +243,8 @@ class AIVisualEffects {
 
         setTimeout(() => {
             explosion.remove();
-            // Redirect to demo page after animation
             window.location.href = e.currentTarget.href;
-        }, 600);
+        }, 800);
     }
 
     // Counter Animation
@@ -349,18 +296,20 @@ class AIVisualEffects {
         const orbs = document.querySelectorAll('.orb');
         orbs.forEach((orb, index) => {
             const speed = (index + 1) * 0.0001;
+            const x = mouseX * 100 * speed;
+            const y = mouseY * 100 * speed;
+            
+            orb.style.transform += ` translate(${x}px, ${y}px)`;
+        });
+
+        // Subtle particle movement
+        const particles = document.querySelectorAll('.particle');
+        particles.forEach((particle, index) => {
+            const speed = (index % 3) * 0.00005;
             const x = mouseX * 50 * speed;
             const y = mouseY * 50 * speed;
-            
-            orb.style.transform = `translate(${x}px, ${y}px)`;
+            particle.style.transform += ` translate(${x}px, ${y}px)`;
         });
-    }
-
-    // Cleanup
-    destroy() {
-        if (this.matrixInterval) {
-            clearInterval(this.matrixInterval);
-        }
     }
 }
 
@@ -397,35 +346,15 @@ const additionalStyles = `
         opacity: 1;
         transform: translateY(0);
     }
-
-    /* Ensure matrix canvas is properly layered */
-    #matrixCanvas {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        z-index: -2 !important;
-        display: block !important;
-    }
 `;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Add additional styles
     const styleSheet = document.createElement('style');
     styleSheet.textContent = additionalStyles;
     document.head.appendChild(styleSheet);
     
-    // Initialize visual effects
-    window.visualEffects = new AIVisualEffects();
+    new AIVisualEffects();
     
-    console.log("Anna Laura AI Visual Effects initialized");
-});
-
-// Handle page unload
-window.addEventListener('beforeunload', () => {
-    if (window.visualEffects) {
-        window.visualEffects.destroy();
-    }
+    console.log("Anna Laura AI Monochrome Effects initialized");
 });
