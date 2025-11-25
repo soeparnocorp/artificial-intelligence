@@ -1,4 +1,4 @@
-// response.js - Advanced Visual Effects for AI Landing Page
+// response.js - Advanced Visual Effects for Anna Laura AI Landing Page
 
 class AIVisualEffects {
     constructor() {
@@ -6,25 +6,63 @@ class AIVisualEffects {
     }
 
     init() {
+        this.initMatrixRain();
         this.createParticles();
         this.initScrollAnimations();
         this.initButtonEffects();
         this.initCounterAnimation();
-        this.initColorMorphing();
         this.initInteractiveBackground();
+    }
+
+    // Matrix Rain Effect
+    initMatrixRain() {
+        const canvas = document.getElementById("matrixCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = new Array(columns).fill(1);
+
+        const drawMatrix = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.08)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "rgba(255,255,255,0.7)";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        };
+
+        setInterval(drawMatrix, 40);
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     }
 
     // Floating Particles System
     createParticles() {
         const particlesContainer = document.querySelector('.floating-particles');
-        const particleCount = 50;
+        const particleCount = 30;
 
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            // Random properties
-            const size = Math.random() * 4 + 1;
+            const size = Math.random() * 3 + 1;
             const posX = Math.random() * 100;
             const posY = Math.random() * 100;
             const delay = Math.random() * 20;
@@ -34,19 +72,17 @@ class AIVisualEffects {
                 position: absolute;
                 width: ${size}px;
                 height: ${size}px;
-                background: ${this.getRandomColor()};
+                background: rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2});
                 border-radius: 50%;
                 left: ${posX}%;
                 top: ${posY}%;
                 animation: floatParticle ${duration}s ease-in-out ${delay}s infinite;
-                filter: blur(${Math.random() * 2}px);
-                opacity: ${Math.random() * 0.6 + 0.2};
+                filter: blur(${Math.random() * 1}px);
             `;
 
             particlesContainer.appendChild(particle);
         }
 
-        // Add CSS for particle animation
         this.addParticleAnimationStyle();
     }
 
@@ -75,13 +111,6 @@ class AIVisualEffects {
         document.head.appendChild(style);
     }
 
-    getRandomColor() {
-        const colors = [
-            '#00f0ff', '#ff00e6', '#00ff88', '#ffaa00', '#8844ff'
-        ];
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-
     // Scroll Animations
     initScrollAnimations() {
         const observerOptions = {
@@ -98,12 +127,10 @@ class AIVisualEffects {
             });
         }, observerOptions);
 
-        // Observe elements for animation
-        document.querySelectorAll('.feature-card, .stat-item, .hero-content').forEach(el => {
+        document.querySelectorAll('.feature-card, .stat-item, .package-box').forEach(el => {
             observer.observe(el);
         });
 
-        // Add scroll-based parallax
         window.addEventListener('scroll', this.handleParallax.bind(this));
     }
 
@@ -138,7 +165,6 @@ class AIVisualEffects {
             button.addEventListener('click', this.createClickEffect.bind(this));
         });
 
-        // Explore button special effect
         const exploreBtn = document.getElementById('exploreBtn');
         if (exploreBtn) {
             exploreBtn.addEventListener('click', this.exploreEffect.bind(this));
@@ -175,7 +201,7 @@ class AIVisualEffects {
 
     createClickEffect(e) {
         const button = e.currentTarget;
-        const particles = 8;
+        const particles = 6;
         
         for (let i = 0; i < particles; i++) {
             const particle = document.createElement('div');
@@ -186,7 +212,7 @@ class AIVisualEffects {
                 position: absolute;
                 width: 4px;
                 height: 4px;
-                background: ${this.getRandomColor()};
+                background: rgba(255, 255, 255, 0.8);
                 border-radius: 50%;
                 left: 50%;
                 top: 50%;
@@ -197,9 +223,9 @@ class AIVisualEffects {
 
             const animation = particle.animate([
                 { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                { transform: `translate(${Math.cos(angle) * 50}px, ${Math.sin(angle) * 50}px) scale(0)`, opacity: 0 }
+                { transform: `translate(${Math.cos(angle) * 40}px, ${Math.sin(angle) * 40}px) scale(0)`, opacity: 0 }
             ], {
-                duration: 800,
+                duration: 600,
                 easing: 'ease-out'
             });
 
@@ -207,8 +233,9 @@ class AIVisualEffects {
         }
     }
 
-    exploreEffect() {
-        // Create explosion effect
+    exploreEffect(e) {
+        e.preventDefault();
+        
         const explosion = document.createElement('div');
         explosion.style.cssText = `
             position: fixed;
@@ -216,7 +243,7 @@ class AIVisualEffects {
             left: 50%;
             width: 100px;
             height: 100px;
-            background: radial-gradient(circle, #00f0ff, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.8), transparent 70%);
             border-radius: 50%;
             transform: translate(-50%, -50%) scale(0);
             animation: exploreExpand 0.8s ease-out forwards;
@@ -226,14 +253,13 @@ class AIVisualEffects {
 
         document.body.appendChild(explosion);
 
-        // Add CSS for explosion
         if (!document.querySelector('#explosion-style')) {
             const style = document.createElement('style');
             style.id = 'explosion-style';
             style.textContent = `
                 @keyframes exploreExpand {
                     0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-                    100% { transform: translate(-50%, -50%) scale(20); opacity: 0; }
+                    100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
                 }
             `;
             document.head.appendChild(style);
@@ -241,7 +267,9 @@ class AIVisualEffects {
 
         setTimeout(() => {
             explosion.remove();
-        }, 800);
+            // Redirect to demo page after animation
+            window.location.href = e.currentTarget.href;
+        }, 600);
     }
 
     // Counter Animation
@@ -281,19 +309,6 @@ class AIVisualEffects {
         });
     }
 
-    // Color Morphing Background
-    initColorMorphing() {
-        const root = document.documentElement;
-        let hue = 0;
-
-        setInterval(() => {
-            hue = (hue + 0.5) % 360;
-            root.style.setProperty('--primary-color', `hsl(${hue}, 100%, 50%)`);
-            root.style.setProperty('--secondary-color', `hsl(${(hue + 120) % 360}, 100%, 50%)`);
-            root.style.setProperty('--accent-color', `hsl(${(hue + 240) % 360}, 100%, 50%)`);
-        }, 100);
-    }
-
     // Interactive Background
     initInteractiveBackground() {
         document.addEventListener('mousemove', this.handleMouseMove.bind(this));
@@ -303,30 +318,18 @@ class AIVisualEffects {
         const mouseX = e.clientX / window.innerWidth;
         const mouseY = e.clientY / window.innerHeight;
 
-        // Move orbs based on mouse position
         const orbs = document.querySelectorAll('.orb');
         orbs.forEach((orb, index) => {
-            const speed = (index + 1) * 0.0002;
+            const speed = (index + 1) * 0.0001;
             const x = mouseX * 100 * speed;
             const y = mouseY * 100 * speed;
             
-            orb.style.transform = `translate(${x}px, ${y}px)`;
+            orb.style.transform += ` translate(${x}px, ${y}px)`;
         });
-
-        // Adjust neural network lines
-        const neural = document.querySelector('.neural-network');
-        if (neural) {
-            neural.style.backgroundPosition = `${mouseX * 100}px ${mouseY * 100}px`;
-        }
     }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new AIVisualEffects();
-});
-
-// Add additional CSS animations
+// Additional CSS animations
 const additionalStyles = `
     @keyframes slideUp {
         from {
@@ -350,17 +353,22 @@ const additionalStyles = `
         animation: slideUp 0.8s ease-out both;
     }
 
-    .feature-card {
+    .feature-card, .package-box {
         opacity: 0;
         transform: translateY(50px);
     }
 
-    .feature-card.animate-in {
+    .feature-card.animate-in, .package-box.animate-in {
         opacity: 1;
         transform: translateY(0);
     }
 `;
 
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = additionalStyles;
+    document.head.appendChild(styleSheet);
+    
+    new AIVisualEffects();
+});
