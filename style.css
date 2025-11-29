@@ -406,3 +406,52 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.45); }
     .stats-grid { grid-template-columns: repeat(2,1fr); }
     .btn { width: 200px; }
 }
+/* Space Interaction Overlay */
+.space-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Floating Star Particles */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    will-change: transform;
+}
+
+/* Interaktif Bumi (orbit mini) */
+.planet-earth {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #3a86ff 0%, #073b4c 70%);
+    box-shadow: 0 0 20px rgba(58, 134, 255, 0.7);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+/* Mouse Aura (Tony Stark style) */
+.mouse-aura {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    mix-blend-mode: screen;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    will-change: transform;
+    }
