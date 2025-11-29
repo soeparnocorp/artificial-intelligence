@@ -313,3 +313,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300);
     console.log("Anna Laura AI — visual script initialized");
 });
+// ==== STAR PARTICLES ====
+const starCount = 150;
+const stars = [];
+const spaceOverlay = document.createElement('div');
+spaceOverlay.className = 'space-overlay';
+document.body.appendChild(spaceOverlay);
+
+for(let i=0;i<starCount;i++){
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.top = `${Math.random()*100}%`;
+    star.style.left = `${Math.random()*100}%`;
+    star.style.width = star.style.height = `${Math.random()*3+1}px`;
+    spaceOverlay.appendChild(star);
+    stars.push({
+        el: star,
+        speed: Math.random()*0.5 + 0.2
+    });
+}
+
+function animateStars(){
+    stars.forEach(s=>{
+        let top = parseFloat(s.el.style.top);
+        top += s.speed;
+        if(top > 100) top = 0;
+        s.el.style.top = top + '%';
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+
+// ==== EARTH PLANET ====
+const earth = document.createElement('div');
+earth.className = 'planet-earth';
+document.body.appendChild(earth);
+
+// ==== MOUSE AURA ====
+const mouseAura = document.createElement('div');
+mouseAura.className = 'mouse-aura';
+document.body.appendChild(mouseAura);
+
+document.addEventListener('mousemove', e=>{
+    mouseAura.style.left = e.clientX + 'px';
+    mouseAura.style.top = e.clientY + 'px';
+    
+    // Bumi mengikuti sedikit arah mouse ala Tony Stark
+    const centerX = window.innerWidth/2;
+    const centerY = window.innerHeight/2;
+    const dx = (e.clientX - centerX)/30;
+    const dy = (e.clientY - centerY)/30;
+    earth.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+});
